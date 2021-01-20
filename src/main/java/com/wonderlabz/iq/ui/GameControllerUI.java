@@ -131,9 +131,8 @@ return session;
     
     // fixedDelay: make the game spin and process results every 30 seconds.
     // this can happen even as new bets are being added.collectPlayerBets prompts for new bets.
-    
-    //initialDelay : lets wait at least 60 seconds before the first wheel spins.
-    @Scheduled(fixedDelay= (30  * 1000), initialDelay = (60 *1000))
+
+    @Scheduled(fixedDelay= (30  * 1000))
     GameSession play(){
        
         //start a new thread and collect user input while the wheel is spinnin for the players who have already set their bets.
@@ -141,25 +140,34 @@ return session;
             Thread t1 = new Thread(new Runnable() {
             public void run()
             {
-                  
+                        collectPlayerBets(session);   
             }});  
             t1.start();
             if (session.getPlayers()==null) {
             
         }
-          collectPlayerBets(session);   
+    
             service.processResults(this.session);
             printWinningResults(this.session);
     return session;
     }
     
     void printWinningResults(GameSession session){
+            System.out.println("WINNING NUMBER"+"   :    "+session.getWinningPosition());
+            String parity="";
+            if (session.getWinningParity()==1) {
+            parity = "EVEN";
+        }else
+            {
+            parity ="ODD";
+            }
+          System.out.println("WINNING PARITY"+"   :    "+parity);
         if (session.getWinningParityBets()==null && session.getWinningPositionBets()==null) {
              System.out.println("No Winners in this Round"); 
              return;
         }
-         System.out.println("Player"+"       "+"Type"+"        "+"Amount" +"         "+"Winnings");
-          System.out.println("------------------------------------------------------------------------------------------");
+         System.out.println("Player"+"       "+"Type"+"        "+"Amount" +"         "+"Winning");
+          System.out.println("---------------------------------------------------------------------------------------");
           if (session.getWinningParityBets()!=null ) {
                 for(Bet bet:session.getWinningParityBets()){
              System.out.println(bet.getPlayer().getName()+"       "+bet.getType().toString()+"        "+bet.getAmount().toString() +"         "+bet.getReward().toString());
@@ -169,6 +177,13 @@ return session;
              for(Bet bet:session.getWinningPositionBets()){
              System.out.println(bet.getPlayer().getName()+"       "+bet.getType().toString()+"        "+bet.getAmount().toString() +"         "+bet.getReward().toString());
     }
+             System.out.println("ALL BETS" );
+              System.out.println("Player"+"       "+"Type"+"        " + "POSITION" + "      PARITY" +"Amount" );
+          System.out.println("---------------------------------------------------------------------------------------");
+                     for(Bet bet:session.getBets()){
+                         
+             System.out.println(bet.getPlayer().getName()+"       "+bet.getType().toString()+"      "+bet.getSelectedPosition()+"        "+bet.getSelectedParity()+"        "+bet.getAmount().toString() );
+    } 
         }
     
       
