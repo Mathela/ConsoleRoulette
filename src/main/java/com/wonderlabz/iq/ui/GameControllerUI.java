@@ -53,8 +53,11 @@ public class GameControllerUI {
     // for each player in game session read player bets in the format
     // amount type value
     GameSession collectPlayerBets(GameSession session){
-        List<Bet> bets= new ArrayList<Bet>();
-       bets  =  session.getBets();
+        List<Bet> bets;
+         bets  =  session.getBets();
+         if (bets==null) {
+           bets = new ArrayList<Bet>();
+        }
         if (session.getPlayers() == null) {
             //no players loaded , exit this round and wait for player file to be loaded
             return session;
