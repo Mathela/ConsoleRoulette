@@ -16,7 +16,7 @@ import java.util.List;
  * Reads list of player names from text file 
  */
 public class ReadFileUtil {
-         List <String> readPlayerNames(String fileName) throws FileNotFoundException, IOException{
+      public static   List <String> readPlayerNames(String fileName) throws FileNotFoundException, IOException{
         List<String> lines = Collections.emptyList(); 
        //each line in text file contains a playerName
 
