@@ -118,8 +118,6 @@ public class GameControllerUI {
                     if (!dontAddCurrentBet) {
                        bets.add(bet);
                       }
-                 
-               
         }   
         
         session.setBets(bets);
