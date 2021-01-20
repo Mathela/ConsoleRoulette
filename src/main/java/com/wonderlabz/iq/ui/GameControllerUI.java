@@ -8,6 +8,8 @@ import com.wonderlabz.iq.services.GameService;
 import com.wonderlabz.iq.utils.ReadFileUtil;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,21 +24,27 @@ import org.springframework.stereotype.Service;
 @Service
 public class GameControllerUI {
      
-      
     //lets allow the game Session to be abean and inject it .
     // that way it can be accessed by multiple threads within the JVM
-    @Bean
+   @Bean
     GameSession getCurrentGame() throws IOException{
         if (session == null) {
-            session = new GameSession();
-         List<String> names =   ReadFileUtil.readPlayerNames("c:\\wonderlabz\\players.txt");
-//         service.startGameService(names);
-         
+            session = new GameSession();     
+            session.setTotalRounds(0);    
+            session.setStartTime(new Date());
         }
-    return session;
+         List<String> names =   ReadFileUtil.readPlayerNames("c:\\wonderlabz\\players.txt");
+         List<Player> players  = new ArrayList();
+        for (String name : names){
+                Player p = new Player();
+                p.setName(name);
+                players.add(p);
+                }
+                session.setPlayers(players);
+     return session;
     }
 
-    @Autowired
+   @Autowired
     GameService service;
     
     @Autowired
@@ -54,10 +62,11 @@ public class GameControllerUI {
         for (Player p:session.getPlayers()) {
                  System.out.println("Enter Amount and Bet Type for "+p.getName()+":");
             //The input provided by user is stored in num
-                Scanner input = new Scanner(System.in);
-           String i=     input.next();
-           String[] ix = i.split(" ");
-           Bet bet = new Bet();
+        Scanner input = new Scanner(System.in);
+        String i=     input.nextLine();
+        System.out.println("this is inpit......\n"+i);
+        String[] ix = i.split(" ");
+        Bet bet = new Bet();
         String  amountX =  ix[0];
         String betTypeX = ix[1];
         String betValueX = ix[2];
@@ -132,6 +141,9 @@ return session;
                   
             }});  
             t1.start();
+            if (session.getPlayers()==null) {
+            
+        }
           collectPlayerBets(session);   
             service.processResults(this.session);
             printWinningResults(this.session);
