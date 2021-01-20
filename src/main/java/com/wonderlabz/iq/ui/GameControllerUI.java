@@ -4,19 +4,44 @@ package com.wonderlabz.iq.ui;
 import com.wonderlabz.iq.domain.Bet;
 import com.wonderlabz.iq.domain.GameSession;
 import com.wonderlabz.iq.domain.Player;
+import com.wonderlabz.iq.services.GameService;
+import com.wonderlabz.iq.utils.ReadFileUtil;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Nkosinathi Mathela
  */
+@Service
 public class GameControllerUI {
     
+    //lets allow the game Session to be abean and inject it .
+    // that way it can be accessed by multiple threads within the JVM
+    @Bean
+    GameSession getCurrentGame() throws IOException{
+        if (session == null) {
+            session = new GameSession();
+         List<String> names =   ReadFileUtil.readPlayerNames("c:\\wonderlabz\\players.txt");
+         service.startGameService(names);
+         
+        }
+    return session;
+    }
+
+    @Autowired
+    GameService service;
+    
+    @Autowired
+      GameSession session;
     
     // for each player in game session read player bets in the format
-    // amount bettype 
+    // amount bettype betvalue
     GameSession collectPlayerBets(GameSession session){
         List<Bet> bets= new ArrayList<Bet>();
        bets  =  session.getBets();
@@ -84,4 +109,9 @@ return session;
 
     }
     
+    GameSessoin play(GameSession session){
+        
+    return session;
+    }
+  
 }
