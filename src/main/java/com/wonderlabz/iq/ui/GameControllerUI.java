@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Scanner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
@@ -41,7 +42,7 @@ public class GameControllerUI {
       GameSession session;
     
     // for each player in game session read player bets in the format
-    // amount bettype betvalue
+    // amount type value
     GameSession collectPlayerBets(GameSession session){
         List<Bet> bets= new ArrayList<Bet>();
        bets  =  session.getBets();
@@ -105,13 +106,43 @@ public class GameControllerUI {
         }   
         
         session.setBets(bets);
+        this.session = session;
 return session;
 
     }
     
-    GameSessoin play(GameSession session){
+    
+    // fixedDelay: make the game spin and process results every 30 seconds.
+    // this can happen even as new bets are being added.collectPlayerBets prompts for new bets.
+    
+    //initialDelay : lets wait at least 60 seconds before the first wheel spins.
+    @Scheduled(fixedDelay= (30  * 1000), initialDelay = (60 *1000))
+    GameSession play(){
+       
+        //start a new thread and collect user input while the wheel is spinnin for the players who have already set their bets.
         
+            Thread t1 = new Thread(new Runnable() {
+            public void run()
+            {
+                    collectPlayerBets(session);   
+            }});  
+            t1.start();
+        
+            service.processResults(this.session);
+            printWinningResults(this.session);
     return session;
+    }
+    
+    void printWinningResults(GameSession session){
+         System.out.println("Player"+"       "+"Type"+"        "+"Amount" +"         "+"Winnings");
+          System.out.println("------------------------------------------------------------------------------------------");
+    for(Bet bet:session.getWinningParityBets()){
+             System.out.println(bet.getPlayer().getName()+"       "+bet.getType().toString()+"        "+bet.getAmount().toString() +"         "+bet.getReward().toString());
+    }
+    
+       for(Bet bet:session.getWinningPositionBets()){
+             System.out.println(bet.getPlayer().getName()+"       "+bet.getType().toString()+"        "+bet.getAmount().toString() +"         "+bet.getReward().toString());
+    }
     }
   
 }
