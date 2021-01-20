@@ -21,7 +21,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class GameControllerUI {
-    
+     
+      
     //lets allow the game Session to be abean and inject it .
     // that way it can be accessed by multiple threads within the JVM
     @Bean
@@ -29,7 +30,7 @@ public class GameControllerUI {
         if (session == null) {
             session = new GameSession();
          List<String> names =   ReadFileUtil.readPlayerNames("c:\\wonderlabz\\players.txt");
-         service.startGameService(names);
+//         service.startGameService(names);
          
         }
     return session;
@@ -46,6 +47,10 @@ public class GameControllerUI {
     GameSession collectPlayerBets(GameSession session){
         List<Bet> bets= new ArrayList<Bet>();
        bets  =  session.getBets();
+        if (session.getPlayers() == null) {
+            //no players loaded , exit this round and wait for player file to be loaded
+            return session;
+        }
         for (Player p:session.getPlayers()) {
                  System.out.println("Enter Amount and Bet Type for "+p.getName()+":");
             //The input provided by user is stored in num
@@ -124,25 +129,38 @@ return session;
             Thread t1 = new Thread(new Runnable() {
             public void run()
             {
-                    collectPlayerBets(session);   
+                  
             }});  
             t1.start();
-        
+          collectPlayerBets(session);   
             service.processResults(this.session);
             printWinningResults(this.session);
     return session;
     }
     
     void printWinningResults(GameSession session){
+        if (session.getWinningParityBets()==null && session.getWinningPositionBets()==null) {
+             System.out.println("No Winners in this Round"); 
+             return;
+        }
          System.out.println("Player"+"       "+"Type"+"        "+"Amount" +"         "+"Winnings");
           System.out.println("------------------------------------------------------------------------------------------");
-    for(Bet bet:session.getWinningParityBets()){
+          if (session.getWinningParityBets()!=null ) {
+                for(Bet bet:session.getWinningParityBets()){
              System.out.println(bet.getPlayer().getName()+"       "+bet.getType().toString()+"        "+bet.getAmount().toString() +"         "+bet.getReward().toString());
     }
+        }
+        if (session.getWinningPositionBets()!=null) {
+             for(Bet bet:session.getWinningPositionBets()){
+             System.out.println(bet.getPlayer().getName()+"       "+bet.getType().toString()+"        "+bet.getAmount().toString() +"         "+bet.getReward().toString());
+    }
+        }
     
-       for(Bet bet:session.getWinningPositionBets()){
-             System.out.println(bet.getPlayer().getName()+"       "+bet.getType().toString()+"        "+bet.getAmount().toString() +"         "+bet.getReward().toString());
+      
     }
+
+    public void start() {
+       collectPlayerBets(this.session);
     }
   
 }
