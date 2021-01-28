@@ -1,18 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.wonderlabz.iq.services;
 
 import com.wonderlabz.iq.domain.Bet;
+import com.wonderlabz.iq.domain.BetType;
 import com.wonderlabz.iq.domain.GameSession;
 import com.wonderlabz.iq.domain.Player;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import org.springframework.stereotype.Component;
 
-
+@Component
 public class GameServiceImpl implements GameService {
      /**
      *creates a new game session with the given  player names 
@@ -49,8 +47,10 @@ public class GameServiceImpl implements GameService {
      return session;
     }
 
-    public GameSession startNewRound(GameSession arg0) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public GameSession startNewRound(GameSession session) {
+        session.setWinningParity(-1);
+        session.setWinningPosition(-1);
+     return session;
     }
 
     /**
@@ -59,10 +59,48 @@ public class GameServiceImpl implements GameService {
      * @return
      */
     public GameSession processResults(GameSession session) {
-        //step 1 check for parity bets
+        //lets get a random number between 0 and 36 inclusive. and then update the sessions winning position.
+        int winningPosition = new Random().nextInt(36);
+        session.setWinningPosition(winningPosition);
         
+        //lets determine the parity of the selected number,(ie is it even or odd). and update the sessions winning parity
+        if(winningPosition%2==0){
+            session.setWinningParity(1);
+        }else{
+               session.setWinningParity(0);
+           }
+      
+        List<Bet> winningParityBets = Collections.emptyList();
+        List<Bet> winningPositionBets = Collections.emptyList();
+        //step 1 check for parity bets
+        if (session.getBets()== null) {
+            //no bets were placed for current game.
+            return session;
+        }
+        for(Bet b:session.getBets()){
+            if (b.getType()==BetType.Parity){
+                if (session.getWinningParity() == b.getSelectedParity()) {
+                    b.setIsWin(true);
+                    winningParityBets.add(b);
+                }
+            }
+        }
         //step 2 check for positiion bets
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        for(Bet b:session.getBets()){
+            if (b.getType()==BetType.Position){
+                if (session.getWinningPosition()== b.getSelectedPosition()) {
+                        b.setIsWin(true);
+                    winningPositionBets.add(b);
+                }
+            }
+        }
+        
+            session.setWinningParityBets(winningParityBets);
+            session.setWinningPositionBets(winningPositionBets);
+            session.setEndTime(new Date());
+
+    return session;
+
     }
     
 }
